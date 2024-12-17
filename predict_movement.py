@@ -11,6 +11,7 @@ from serial.tools.list_ports import comports
 # Configuration settings
 csv_file = "imu_data.csv"
 model_file = "drone_svm_model.pkl"
+model = joblib.load(model_file)
 baud_rate = 115200
 timeout = 1
 
@@ -18,8 +19,8 @@ timeout = 1
 gesture_actions = {
     "up": lambda drone: drone.move_up(30),
     "down": lambda drone: drone.move_down(30),
-    "left": lambda drone: drone.move_left(30),
-    "right": lambda drone: drone.move_right(30),
+    "left": lambda drone: drone.move_left(40),
+    "right": lambda drone: drone.move_right(40),
     "roll": lambda drone: drone.flip("l"),
     "rotate": lambda drone: drone.rotate_counter_clockwise(180),
     "neutral": lambda drone: print("Neutral detected, holding."),
@@ -74,7 +75,7 @@ def classify_imu_data(port):
                             csvfile.flush()
 
                 if os.path.exists(csv_file):
-                    predicted_label = classify_data(csv_file, model_file)
+                    predicted_label = classify_data(csv_file)
                     print(f"\nPredicted Gesture: {predicted_label}\n")
                     execute_drone_action(drone, predicted_label)
                 else:
@@ -95,8 +96,7 @@ def classify_imu_data(port):
                 print(f"Error while landing the drone: {e}")
 
 
-def classify_data(data_file, model_path):
-    model = joblib.load(model_path)
+def classify_data(data_file):
     data = pd.read_csv(data_file)
 
     max_length = 401  
